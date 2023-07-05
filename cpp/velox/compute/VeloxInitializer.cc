@@ -32,6 +32,9 @@
 #ifdef ENABLE_S3
 #include "velox/connectors/hive/storage_adapters/s3fs/S3FileSystem.h"
 #endif
+#ifdef ENABLE_GCS
+#include "velox/connectors/hive/storage_adapters/gcs/GCSFileSystem.h"
+#endif
 #include "velox/common/memory/MmapAllocator.h"
 #include "velox/connectors/hive/HiveConnector.h"
 #include "velox/dwio/dwrf/reader/DwrfReader.h"
@@ -197,6 +200,10 @@ void VeloxInitializer::init(const std::unordered_map<std::string, std::string>& 
   });
 
   configurationValues.merge(s3Config);
+#endif
+
+#ifdef ENABLE_GCS
+  velox::filesystems::registerGCSFileSystem();
 #endif
 
   initCache(conf);

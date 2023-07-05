@@ -3,6 +3,8 @@
 set -exu
 #Set on run gluten on S3
 ENABLE_S3=OFF
+#Set on run gluten on GCS
+ENABLE_GCS=OFF
 #Set on run gluten on HDFS
 ENABLE_HDFS=OFF
 BUILD_TYPE=release
@@ -27,6 +29,10 @@ for arg in "$@"; do
     ;;
   --enable_s3=*)
     ENABLE_S3=("${arg#*=}")
+    shift # Remove argument name from processing
+    ;;
+  --enable_gcs=*)
+    ENABLE_GCS=("${arg#*=}")
     shift # Remove argument name from processing
     ;;
   --enable_hdfs=*)
@@ -71,6 +77,9 @@ function compile {
   fi
   if [ $ENABLE_S3 == "ON" ]; then
     COMPILE_OPTION="$COMPILE_OPTION -DVELOX_ENABLE_S3=ON"
+  fi
+  if [ $ENABLE_GCS == "ON" ]; then
+      COMPILE_OPTION="$COMPILE_OPTION -DVELOX_ENABLE_GCS=ON"
   fi
 
   # Let Velox use pre-build arrow,parquet,thrift.
@@ -174,6 +183,7 @@ echo "CMAKE Arguments:"
 echo "VELOX_HOME=${VELOX_HOME}"
 echo "ARROW_HOME=${ARROW_HOME}"
 echo "ENABLE_S3=${ENABLE_S3}"
+echo "ENABLE_GCS=${ENABLE_GCS}"
 echo "ENABLE_HDFS=${ENABLE_HDFS}"
 echo "BUILD_TYPE=${BUILD_TYPE}"
 
