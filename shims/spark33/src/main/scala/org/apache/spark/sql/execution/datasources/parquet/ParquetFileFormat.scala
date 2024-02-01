@@ -149,6 +149,10 @@ class ParquetFileFormat extends FileFormat with DataSourceRegister with Logging 
         SQLConf.PARQUET_FIELD_ID_WRITE_ENABLED.key,
         sparkSession.sessionState.conf.parquetFieldIdWriteEnabled.toString)
 
+      conf.set(
+        SQLConf.LEGACY_PARQUET_NANOS_AS_LONG.key,
+        sparkSession.sessionState.conf.legacyParquetNanosAsLong.toString)
+
       // Sets compression scheme
       conf.set(ParquetOutputFormat.COMPRESSION, parquetOptions.compressionCodecClassName)
 
@@ -453,7 +457,10 @@ object ParquetFileFormat extends Logging {
 
     val converter = new ParquetToSparkSchemaConverter(
       sparkSession.sessionState.conf.isParquetBinaryAsString,
-      sparkSession.sessionState.conf.isParquetINT96AsTimestamp)
+      sparkSession.sessionState.conf.isParquetINT96AsTimestamp,
+      sparkSession.sessionState.conf.caseSensitiveAnalysis,
+      sparkSession.sessionState.conf.legacyParquetNanosAsLong
+    )
 
     val seen = mutable.HashSet[String]()
     val finalSchemas: Seq[StructType] = footers.flatMap {
