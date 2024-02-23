@@ -176,12 +176,8 @@ class CHMetricsApi extends MetricsApi with Logging with LogLevelUtil {
       "outputWaitTime" -> SQLMetrics.createTimingMetric(sparkContext, "time of waiting for output"),
       "resizeInputRows" -> SQLMetrics.createMetric(sparkContext, "number of resize input rows"),
       "resizeOutputRows" -> SQLMetrics.createMetric(sparkContext, "number of resize output rows"),
-      "preProjectTime" ->
-        SQLMetrics.createTimingMetric(sparkContext, "time of preProjection"),
       "aggregatingTime" ->
         SQLMetrics.createTimingMetric(sparkContext, "time of aggregating"),
-      "postProjectTime" ->
-        SQLMetrics.createTimingMetric(sparkContext, "time of postProjection"),
       "totalTime" -> SQLMetrics.createTimingMetric(sparkContext, "total time")
     )
 
@@ -349,16 +345,16 @@ class CHMetricsApi extends MetricsApi with Logging with LogLevelUtil {
   override def genHashJoinTransformerMetricsUpdater(
       metrics: Map[String, SQLMetric]): MetricsUpdater = new HashJoinMetricsUpdater(metrics)
 
-  override def genCartesianProductTransformerMetrics(
+  override def genNestedLoopJoinTransformerMetrics(
       sparkContext: SparkContext): Map[String, SQLMetric] = {
     throw new UnsupportedOperationException(
-      s"CartesianProductExecTransformer metrics update is not supported in CH backend")
+      s"NestedLoopJoinTransformer metrics update is not supported in CH backend")
   }
 
-  override def genCartesianProductTransformerMetricsUpdater(
+  override def genNestedLoopJoinTransformerMetricsUpdater(
       metrics: Map[String, SQLMetric]): MetricsUpdater = {
     throw new UnsupportedOperationException(
-      s"CartesianProductExecTransformer metrics update is not supported in CH backend")
+      s"NestedLoopJoinTransformer metrics update is not supported in CH backend")
   }
   override def genGenerateTransformerMetrics(sparkContext: SparkContext): Map[String, SQLMetric] =
     Map(

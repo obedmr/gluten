@@ -146,17 +146,17 @@ abstract class HashAggregateExecBaseTransformer(
       case s: Sum if s.prettyName.equals("try_sum") => false
       case _: CollectList | _: CollectSet =>
         mode match {
-          case Partial | Final => true
+          case Partial | Final | Complete => true
           case _ => false
         }
       case bloom if bloom.getClass.getSimpleName.equals("BloomFilterAggregate") =>
         mode match {
-          case Partial | Final => true
+          case Partial | Final | Complete => true
           case _ => false
         }
       case _ =>
         mode match {
-          case Partial | PartialMerge | Final => true
+          case Partial | PartialMerge | Final | Complete => true
           case _ => false
         }
     }
@@ -166,6 +166,7 @@ abstract class HashAggregateExecBaseTransformer(
     aggregateMode match {
       case Partial => "PARTIAL"
       case PartialMerge => "PARTIAL_MERGE"
+      case Complete => "COMPLETE"
       case Final => "FINAL"
       case other =>
         throw new UnsupportedOperationException(s"not currently supported: $other.")
@@ -178,21 +179,6 @@ abstract class HashAggregateExecBaseTransformer(
       aggParams: AggregationParams,
       input: RelNode = null,
       validation: Boolean = false): RelNode
-}
-
-object HashAggregateExecTransformerUtil {
-  // Return whether the outputs partial aggregation should be combined for Velox computing.
-  // When the partial outputs are multiple-column, row construct is needed.
-  def rowConstructNeeded(aggregateExpressions: Seq[AggregateExpression]): Boolean = {
-    aggregateExpressions.exists {
-      aggExpr =>
-        aggExpr.mode match {
-          case PartialMerge | Final =>
-            aggExpr.aggregateFunction.inputAggBufferAttributes.size > 1
-          case _ => false
-        }
-    }
-  }
 }
 
 abstract class HashAggregateExecPullOutBaseHelper(

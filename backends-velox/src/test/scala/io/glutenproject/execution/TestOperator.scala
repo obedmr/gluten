@@ -888,6 +888,16 @@ class TestOperator extends VeloxWholeStageTransformerSuite with AdaptiveSparkPla
       ) {
         checkOperatorMatch[CartesianProductExecTransformer]
       }
+
+      withSQLConf("spark.sql.autoBroadcastJoinThreshold" -> "1MB") {
+        runQueryAndCompare(
+          """
+            |select * from t1 cross join t2;
+            |""".stripMargin
+        ) {
+          checkOperatorMatch[BroadcastNestedLoopJoinExecTransformer]
+        }
+      }
     }
   }
 
@@ -991,14 +1001,13 @@ class TestOperator extends VeloxWholeStageTransformerSuite with AdaptiveSparkPla
     )(df => checkFallbackOperators(df, 0))
   }
 
-  test("Do not support multi-children count with row construct") {
-    // TODO: Remove this test when Velox support multi-children Count
+  test("Support multi-children count with row construct") {
     runQueryAndCompare(
       """
         |select l_orderkey, count(distinct l_partkey, l_comment), corr(l_partkey, l_partkey+1)
         |from lineitem group by l_orderkey
         |""".stripMargin
-    )(df => checkFallbackOperators(df, 1))
+    )(df => checkFallbackOperators(df, 0))
   }
 
   test("Remainder with non-foldable right side") {

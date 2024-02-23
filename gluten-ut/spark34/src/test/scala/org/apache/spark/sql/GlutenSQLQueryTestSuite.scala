@@ -36,6 +36,7 @@ import java.io.File
 import java.net.URI
 import java.util.Locale
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.sys.process.{Process, ProcessLogger}
 import scala.util.Try
@@ -209,6 +210,12 @@ class GlutenSQLQueryTestSuite
   private val otherIgnoreList =
     if (testCommandAvailable("/bin/bash")) Nil else Set("transform.sql")
 
+  // 3.4 inadvertently enabled with "group-by.sql" and "group-by-ordinal.sql"
+  private val udafIgnoreList = Set(
+    "udaf/udaf-group-by-ordinal.sql",
+    "udaf/udaf-group-by.sql"
+  )
+
   /** List of test cases to ignore, in lower cases. */
   protected def ignoreList: Set[String] = Set(
     "ignored.sql", // Do NOT remove this one. It is here to test the ignore functionality.
@@ -219,10 +226,8 @@ class GlutenSQLQueryTestSuite
     "array.sql", // blocked by VELOX-5768
     "higher-order-functions.sql", // blocked by VELOX-5768
     "udf/udf-window.sql", // Local window fixes are not added.
-    "window.sql", // Local window fixes are not added.
-    "select_having.sql", // 3.4 failed
-    "mapconcat.sql" // 3.4 failed
-  ) ++ otherIgnoreList
+    "window.sql" // Local window fixes are not added.
+  ) ++ otherIgnoreList ++ udafIgnoreList
 
   // List of supported cases to run with a certain backend, in lower case.
   private val supportedList: Set[String] =
@@ -505,7 +510,7 @@ class GlutenSQLQueryTestSuite
         QueryOutput(
           sql = sql,
           schema = schema,
-          output = output.mkString("\n").replaceAll("\\s+$", ""))
+          output = normalizeIds(output.mkString("\n").replaceAll("\\s+$", "")))
     }
 
     if (regenerateGoldenFiles) {
@@ -582,6 +587,18 @@ class GlutenSQLQueryTestSuite
               s" for query #$i\n${expected.sql}")(output.output)
       }
     }
+  }
+
+  protected val normalizeRegex = "#\\d+L?".r
+  protected val nodeNumberRegex = "[\\^*]\\(\\d+\\)".r
+  protected def normalizeIds(plan: String): String = {
+    val normalizedPlan = nodeNumberRegex.replaceAllIn(plan, "")
+    val map = new mutable.HashMap[String, String]()
+    normalizeRegex
+      .findAllMatchIn(normalizedPlan)
+      .map(_.toString)
+      .foreach(map.getOrElseUpdate(_, (map.size + 1).toString))
+    normalizeRegex.replaceAllIn(normalizedPlan, regexMatch => s"#${map(regexMatch.toString)}")
   }
 
   protected lazy val listTestCases: Seq[TestCase] = {

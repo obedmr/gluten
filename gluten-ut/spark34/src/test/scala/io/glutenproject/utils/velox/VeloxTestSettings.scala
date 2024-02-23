@@ -1053,7 +1053,7 @@ class VeloxTestSettings extends BackendTestSettings {
     .excludeByPrefix("SPARK-22790")
     // plan is different cause metric is different, rewrite
     .excludeByPrefix("SPARK-25237")
-    // ignoreMissingFiles mode, wait to fix
+    // error msg from velox is different & reader options is not supported, rewrite
     .exclude("Enabling/disabling ignoreMissingFiles using parquet")
     .exclude("Enabling/disabling ignoreMissingFiles using orc")
     .exclude("Spark native readers should respect spark.sql.caseSensitive - orc")
@@ -1078,7 +1078,6 @@ class VeloxTestSettings extends BackendTestSettings {
     .exclude(
       "SPARK-43113: Full outer join with duplicate stream-side references in condition (SMJ)")
   enableSuite[GlutenMathFunctionsSuite]
-    .exclude("SPARK-44973: conv must allocate enough space for all digits plus negative sign")
   enableSuite[GlutenMetadataCacheSuite]
     .exclude("SPARK-16336,SPARK-27961 Suggest fixing FileNotFoundException")
   enableSuite[GlutenMiscFunctionsSuite]

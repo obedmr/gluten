@@ -125,4 +125,9 @@ trait BackendSettingsApi {
   def shouldRewriteCount(): Boolean = false
 
   def supportCartesianProductExec(): Boolean = false
+
+  def supportBroadcastNestedLoopJoinExec(): Boolean = false
+
+  /** Merge two phases hash based aggregate if need */
+  def mergeTwoPhasesHashBaseAggregateIfNeed(): Boolean = false
 }

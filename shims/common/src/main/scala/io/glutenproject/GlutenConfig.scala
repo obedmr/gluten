@@ -260,6 +260,9 @@ class GlutenConfig(conf: SQLConf) extends Logging {
   def cartesianProductTransformerEnabled: Boolean =
     conf.getConf(CARTESIAN_PRODUCT_TRANSFORMER_ENABLED)
 
+  def broadcastNestedLoopJoinTransformerTransformerEnabled: Boolean =
+    conf.getConf(BROADCAST_NESTED_LOOP_JOIN_TRANSFORMER_ENABLED)
+
   def transformPlanLogLevel: String = conf.getConf(TRANSFORM_PLAN_LOG_LEVEL)
 
   def substraitPlanLogLevel: String = conf.getConf(SUBSTRAIT_PLAN_LOG_LEVEL)
@@ -529,7 +532,8 @@ object GlutenConfig {
       })
 
     val keyWithDefault = ImmutableList.of(
-      (SQLConf.CASE_SENSITIVE.key, "false")
+      (SQLConf.CASE_SENSITIVE.key, "false"),
+      (SQLConf.IGNORE_MISSING_FILES.key, "false")
     )
     keyWithDefault.forEach(e => nativeConfMap.put(e._1, conf.getOrElse(e._1, e._2)))
 
@@ -1326,6 +1330,14 @@ object GlutenConfig {
       .booleanConf
       .createOptional
 
+  val NATIVE_WRITE_FILES_COLUMN_METADATA_EXCLUSION_LIST =
+    buildConf("spark.gluten.sql.native.writeColumnMetadataExclusionList")
+      .doc(
+        "Native write files does not support column metadata. Metadata in list would be " +
+          "removed to support native write files. Multiple values separated by commas.")
+      .stringConf
+      .createWithDefault("comment")
+
   val REMOVE_NATIVE_WRITE_FILES_SORT_AND_PROJECT =
     buildConf("spark.gluten.sql.removeNativeWriteFilesSortAndProject")
       .internal()
@@ -1529,6 +1541,13 @@ object GlutenConfig {
     buildConf("spark.gluten.sql.cartesianProductTransformerEnabled")
       .internal()
       .doc("Config to enable CartesianProductExecTransformer.")
+      .booleanConf
+      .createWithDefault(true)
+
+  val BROADCAST_NESTED_LOOP_JOIN_TRANSFORMER_ENABLED =
+    buildConf("spark.gluten.sql.broadcastNestedLoopJoinTransformerEnabled")
+      .internal()
+      .doc("Config to enable BroadcastNestedLoopJoinExecTransformer.")
       .booleanConf
       .createWithDefault(true)
 

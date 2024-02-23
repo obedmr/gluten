@@ -327,6 +327,7 @@ class ClickHouseTestSettings extends BackendTestSettings {
   enableSuite[GlutenFileBasedDataSourceSuite]
     .exclude("SPARK-23072 Write and read back unicode column names - csv")
     .excludeByPrefix("Enabling/disabling ignoreMissingFiles using")
+    .excludeGlutenTestsByPrefix("Enabling/disabling ignoreMissingFiles using")
     .exclude("Spark native readers should respect spark.sql.caseSensitive - parquet")
     .exclude("Spark native readers should respect spark.sql.caseSensitive - orc")
     .exclude("SPARK-25237 compute correct input metrics in FileScanRDD")
@@ -831,6 +832,7 @@ class ClickHouseTestSettings extends BackendTestSettings {
     .exclude("do not replace hash aggregate if child does not have sort order")
     .exclude("do not replace hash aggregate if there is no group-by column")
     .exclude("Gluten - replace partial hash aggregate with sort aggregate")
+    .exclude("Gluten - replace partial and final hash aggregate together with sort aggregate")
   enableSuite[GlutenReuseExchangeAndSubquerySuite]
   enableSuite[GlutenSQLWindowFunctionSuite]
     .exclude("window function: partition and order expressions")
